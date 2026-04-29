@@ -13,9 +13,9 @@ Email notifications, and WhatsApp notifications.
 ## Project Structure
 ```
 powerzone-final/
-├── public/
-│   ├── index.html        ← Main website
-│   └── admin.html        ← Admin dashboard
+
+├── index.html        ← Main website
+├── admin.html        ← Admin dashboard
 ├── server.js             ← Express server + API
 ├── database.js           ← DB setup
 ├── notify.js             ← Email + WhatsApp notifications
