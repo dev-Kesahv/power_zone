@@ -27,14 +27,15 @@ app.post('/api/contact', async (req, res) => {
   if (!phone || !phone.trim()) return res.status(400).json({ error: 'Phone is required' });
   try {
     const contacts = await connectDB();
-    const doc = await contacts.insertOne({
+    const newContact = {
       name:      name.trim(),
       phone:     phone.trim(),
       message:   (message || '').trim(),
       plan:      (plan    || '').trim(),
       createdAt: new Date().toISOString(),
-    });
-    const insertedDoc = { ...doc, _id: doc.insertedId };
+    };
+    const doc = await contacts.insertOne(newContact);
+    const insertedDoc = { ...newContact, _id: doc.insertedId };
     // Fire notifications in background — don't block the response
     notifyOwner(insertedDoc).catch(err => console.error('[Notify] Unexpected error:', err));
     res.json({ success: true, id: doc.insertedId });
