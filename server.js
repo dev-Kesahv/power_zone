@@ -10,9 +10,15 @@ const { notifyOwner }  = require('./notify');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
+// Vercel-specific path handling
+const isVercel = process.env.VERCEL === '1';
+const staticPath = isVercel 
+  ? path.join(process.cwd(), 'public')
+  : path.join(__dirname, 'public');
+
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(staticPath));
 
 // POST /api/contact — save enquiry + notify owner
 app.post('/api/contact', async (req, res) => {
@@ -65,15 +71,26 @@ app.get('/api/stats', async (req, res) => {
 
 // Admin page
 app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+  res.sendFile(path.join(staticPath, 'admin.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`\n  Power Zone server running → http://localhost:${PORT}`);
-  console.log(`  Admin panel             → http://localhost:${PORT}/admin\n`);
-  if (!process.env.GMAIL_USER)         console.warn('  ⚠️  Email not configured    — add GMAIL_USER to .env');
-  if (!process.env.TWILIO_ACCOUNT_SID) console.warn('  ⚠️  WhatsApp not configured — add TWILIO credentials to .env');
-  if (process.env.GMAIL_USER && process.env.TWILIO_ACCOUNT_SID) {
-    console.log('  ✅ Email + WhatsApp notifications active\n');
-  }
+// Index page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(staticPath, 'index.html'));
 });
+
+// Export for Vercel
+module.exports = app;
+
+// Local development server
+if (!isVercel) {
+  app.listen(PORT, () => {
+    console.log(`\n  Power Zone server running → http://localhost:${PORT}`);
+    console.log(`  Admin panel             → http://localhost:${PORT}/admin\n`);
+    if (!process.env.GMAIL_USER)         console.warn('  ⚠️  Email not configured    — add GMAIL_USER to .env');
+    if (!process.env.TWILIO_ACCOUNT_SID) console.warn('  ⚠️  WhatsApp not configured — add TWILIO credentials to .env');
+    if (process.env.GMAIL_USER && process.env.TWILIO_ACCOUNT_SID) {
+      console.log('  ✅ Email + WhatsApp notifications active\n');
+    }
+  });
+}
