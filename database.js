@@ -1,9 +1,18 @@
-const Datastore = require('nedb-promises');
-const path = require('path');
+const { MongoClient } = require('mongodb');
 
-const contacts = Datastore.create({
-  filename: path.join(__dirname, 'data', 'contacts.db'),
-  autoload: true
-});
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const client = new MongoClient(uri);
 
-module.exports = { contacts };
+let contacts;
+
+async function connectDB() {
+  if (!contacts) {
+    await client.connect();
+    const db = client.db('powerzone');
+    contacts = db.collection('contacts');
+    console.log('✅ Connected to MongoDB');
+  }
+  return contacts;
+}
+
+module.exports = { connectDB, getContacts: () => contacts };
