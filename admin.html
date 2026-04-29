@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Power Zone</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#f2c94c;--bg:#111;--card:#1a1a1a;--border:#252525;--text:#eaeaea;--muted:#777;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+a{text-decoration:none;color:inherit;}
+header{
+  padding:18px 5%;background:#0a0a0a;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:800;color:var(--gold);}
+.logo span{color:#fff;}
+header a{font-size:.85rem;color:var(--muted);border:1px solid var(--border);padding:7px 16px;border-radius:20px;transition:.2s;}
+header a:hover{border-color:var(--gold);color:var(--gold);}
+main{padding:40px 5%;}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:30px;}
+.page-title span{color:var(--gold);}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:36px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 20px;}
+.stat .num{font-family:'Barlow Condensed',sans-serif;font-size:2.2rem;font-weight:800;color:var(--gold);}
+.stat .lbl{font-size:.8rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px;}
+
+/* TABLE */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.table-header{
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+}
+.table-header h3{font-size:1rem;font-weight:600;}
+.search-box{
+  padding:8px 14px;background:#111;border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:.85rem;outline:none;width:220px;
+}
+.search-box:focus{border-color:rgba(242,201,76,.4);}
+table{width:100%;border-collapse:collapse;}
+th{padding:12px 20px;text-align:left;font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);background:#111;}
+td{padding:14px 20px;font-size:.88rem;border-bottom:1px solid var(--border);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.badge{
+  display:inline-block;font-size:.75rem;font-weight:600;
+  padding:3px 10px;border-radius:12px;
+}
+.badge-basic{background:rgba(100,149,237,.15);color:#6495ed;}
+.badge-standard{background:rgba(152,251,152,.12);color:#5cb85c;}
+.badge-premium{background:rgba(242,201,76,.15);color:var(--gold);}
+.badge-gold{background:rgba(255,165,0,.15);color:#ffa500;}
+.badge-general{background:rgba(150,150,150,.15);color:#999;}
+.empty{padding:40px;text-align:center;color:var(--muted);font-size:.9rem;}
+.refresh-btn{
+  padding:8px 18px;background:transparent;border:1px solid var(--border);
+  border-radius:8px;color:var(--muted);cursor:pointer;font-size:.84rem;transition:.2s;
+}
+.refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
+.delete-btn{
+  background:none;border:none;color:#e55;cursor:pointer;font-size:.8rem;padding:4px 8px;
+  border-radius:6px;transition:.2s;
+}
+.delete-btn:hover{background:rgba(229,85,85,.1);}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">Power<span>Zone</span> <span style="color:var(--muted);font-size:1rem;font-weight:400;">Admin</span></span>
+  <a href="/">← Back to Site</a>
+</header>
+
+<main>
+  <div class="page-title">Dashboard <span>Overview</span></div>
+
+  <div class="stats-row" id="stats-row">
+    <div class="stat"><div class="num" id="s-total">—</div><div class="lbl">Total Enquiries</div></div>
+    <div class="stat"><div class="num" id="s-basic">—</div><div class="lbl">Basic</div></div>
+    <div class="stat"><div class="num" id="s-standard">—</div><div class="lbl">Standard</div></div>
+    <div class="stat"><div class="num" id="s-premium">—</div><div class="lbl">Premium</div></div>
+    <div class="stat"><div class="num" id="s-gold">—</div><div class="lbl">Gold</div></div>
+    <div class="stat"><div class="num" id="s-general">—</div><div class="lbl">General</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <h3>All Enquiries</h3>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <input class="search-box" id="search" placeholder="Search name or phone..." oninput="filterTable()">
+        <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+      </div>
+    </div>
+    <div id="table-container">
+      <div class="empty">Loading...</div>
+    </div>
+  </div>
+</main>
+
+<script>
+let allContacts = [];
+
+async function loadData(){
+  try{
+    const [cr, sr] = await Promise.all([
+      fetch('/api/contacts').then(r=>r.json()),
+      fetch('/api/stats').then(r=>r.json())
+    ]);
+    allContacts = cr;
+    document.getElementById('s-total').textContent = sr.total;
+    document.getElementById('s-basic').textContent = sr.byPlan.Basic||0;
+    document.getElementById('s-standard').textContent = sr.byPlan.Standard||0;
+    document.getElementById('s-premium').textContent = sr.byPlan.Premium||0;
+    document.getElementById('s-gold').textContent = sr.byPlan.Gold||0;
+    document.getElementById('s-general').textContent = sr.byPlan.General||0;
+    renderTable(allContacts);
+  } catch(e){
+    document.getElementById('table-container').innerHTML='<div class="empty">Failed to load data. Is the server running?</div>';
+  }
+}
+
+function renderTable(data){
+  if(!data.length){
+    document.getElementById('table-container').innerHTML='<div class="empty">No enquiries yet. They will appear here once people submit the contact form.</div>';
+    return;
+  }
+  const rows = data.map(c=>`
+    <tr>
+      <td>${esc(c.name)}</td>
+      <td>${esc(c.phone)}</td>
+      <td>${c.plan ? `<span class="badge badge-${c.plan.toLowerCase()}">${esc(c.plan)}</span>` : '<span class="badge badge-general">General</span>'}</td>
+      <td style="color:var(--muted);max-width:200px;">${esc(c.message)||'—'}</td>
+      <td style="color:var(--muted);white-space:nowrap;">${formatDate(c.createdAt)}</td>
+    </tr>
+  `).join('');
+  document.getElementById('table-container').innerHTML=`
+    <table>
+      <thead><tr>
+        <th>Name</th><th>Phone</th><th>Plan</th><th>Message</th><th>Date</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function filterTable(){
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = allContacts.filter(c=>
+    c.name.toLowerCase().includes(q) || c.phone.includes(q)
+  );
+  renderTable(filtered);
+}
+
+function esc(s){
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function formatDate(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) + ' ' +
+         d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+
+loadData();
+setInterval(loadData, 30000);
+</script>
+</body>
+</html>

@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Power Zone – The Fitness Club | Panagar</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --gold:#f2c94c;
+  --gold-dark:#d4a017;
+  --bg:#1a1a1a;
+  --bg2:#111111;
+  --card:#151515;
+  --text:#eaeaea;
+  --muted:#999;
+  --border:#2a2a2a;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+
+/* HEADER */
+header{
+  position:fixed;top:0;width:100%;
+  padding:16px 6%;
+  background:rgba(17,17,17,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  z-index:1000;
+  transition:.3s;
+}
+.logo{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:1.6rem;font-weight:800;
+  letter-spacing:2px;color:var(--gold);
+  text-transform:uppercase;
+}
+.logo span{color:#fff;}
+nav{display:flex;align-items:center;gap:28px;}
+nav a{font-size:.9rem;font-weight:500;color:var(--muted);transition:.2s;letter-spacing:.5px;position:relative;}
+nav a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--gold);transition:.3s;}
+nav a:hover,nav a.active{color:var(--gold);}
+nav a.active::after{width:100%;}
+
+/* HAMBURGER */
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+.hamburger span{width:24px;height:2px;background:var(--text);transition:.3s;display:block;}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+.mobile-nav{
+  display:none;position:fixed;top:65px;left:0;right:0;
+  background:#111;border-bottom:1px solid var(--border);
+  flex-direction:column;padding:16px 6%;gap:16px;z-index:999;
+}
+.mobile-nav.open{display:flex;}
+.mobile-nav a{font-size:1rem;color:var(--muted);padding:8px 0;border-bottom:1px solid var(--border);}
+.mobile-nav a:last-child{border-bottom:none;}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;
+  padding:0 8%;
+  background:
+    linear-gradient(105deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.18) 100%),
+    url('	https://4kwallpapers.com/images/walls/thumbs_3t/21441.jpg') center/cover no-repeat;
+  position:relative;
+  overflow:hidden;
+}
+.hero::after{
+  content:'';
+  position:absolute;bottom:0;left:0;right:0;height:180px;
+  background:linear-gradient(transparent,var(--bg));
+  pointer-events:none;
+}
+.hero-content{
+  max-width:680px;
+  animation:fadeUp .9s ease both;
+  position:relative;z-index:1;
+}
+.hero-eyebrow{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:20px;
+}
+.hero-eyebrow-line{width:40px;height:2px;background:var(--gold);}
+.hero-eyebrow span{
+  font-size:.78rem;letter-spacing:4px;text-transform:uppercase;
+  color:var(--gold);font-weight:600;
+}
+.hero-motivate{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(1rem,2vw,1.15rem);
+  font-weight:600;letter-spacing:6px;text-transform:uppercase;
+  color:rgba(255,255,255,.45);
+  margin-bottom:10px;
+}
+.hero h2{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(3.8rem,9vw,7rem);
+  font-weight:800;letter-spacing:2px;
+  text-transform:uppercase;line-height:.95;
+  color:#fff;
+  margin-bottom:8px;
+}
+.hero h2 .outline{
+  -webkit-text-stroke:2px #fff;
+  color:transparent;
+}
+.hero h2 .gold{color:var(--gold);}
+.hero-sub{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(1.6rem,4vw,2.6rem);
+  font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+  margin-bottom:24px;
+}
+.hero-divider{
+  width:60px;height:3px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+  margin:22px 0 26px;
+}
+.hero p{
+  color:rgba(255,255,255,.65);
+  font-size:1rem;line-height:1.75;
+  max-width:460px;
+  margin-bottom:38px;
+}
+.btn-group{display:flex;gap:14px;flex-wrap:wrap;}
+.btn{
+  padding:14px 32px;
+  font-size:.88rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  transition:.25s;cursor:pointer;border:none;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary{
+  background:var(--gold);color:#000;
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 100%,0 100%);
+  padding-right:40px;
+}
+.btn-primary:hover{background:var(--gold-dark);transform:translateX(4px);}
+.btn-outline{
+  background:transparent;color:#fff;
+  border:2px solid rgba(255,255,255,.4);
+  clip-path:polygon(12px 0,100% 0,100% 100%,0 100%);
+  padding-left:40px;
+}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+
+/* HERO STATS BAR */
+.hero-stats{
+  position:absolute;bottom:0;left:0;right:0;
+  display:flex;align-items:stretch;
+  background:rgba(0,0,0,.75);
+  backdrop-filter:blur(12px);
+  border-top:1px solid rgba(242,201,76,.2);
+  z-index:2;
+}
+.hero-stat{
+  flex:1;padding:18px 24px;
+  border-right:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;gap:14px;
+}
+.hero-stat:last-child{border-right:none;}
+.hero-stat-num{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:2rem;font-weight:800;color:var(--gold);line-height:1;
+}
+.hero-stat-lbl{font-size:.75rem;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase;line-height:1.4;}
+
+.scroll-hint{
+  display:none;
+}
+
+/* SECTIONS */
+section{padding:90px 6%;}
+.section-label{
+  font-size:.75rem;letter-spacing:4px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:10px;
+}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(2rem,4vw,2.8rem);font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+.section-head{margin-bottom:50px;}
+
+/* ABOUT */
+#about{background:var(--bg2);}
+.about-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.about-text p{color:#b0b0b0;line-height:1.9;margin-bottom:16px;font-size:.98rem;}
+.about-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.stat-box{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:24px;text-align:center;
+}
+.stat-box .num{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:2.4rem;font-weight:800;color:var(--gold);
+}
+.stat-box .lbl{font-size:.82rem;color:var(--muted);margin-top:4px;}
+
+/* SERVICES */
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;}
+.service-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:32px 24px;
+  transition:.3s;cursor:default;position:relative;overflow:hidden;
+}
+.service-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0;transition:.3s;
+}
+.service-card:hover{transform:translateY(-6px);border-color:rgba(242,201,76,.25);}
+.service-card:hover::before{opacity:1;}
+.service-icon{font-size:2rem;margin-bottom:14px;}
+.service-card h4{font-weight:600;font-size:1rem;margin-bottom:8px;color:#fff;}
+.service-card p{font-size:.85rem;color:var(--muted);line-height:1.6;}
+
+/* WHY */
+#why{background:var(--bg2);}
+.why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;}
+.why-item{
+  display:flex;align-items:flex-start;gap:16px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:24px;
+}
+.why-icon{
+  width:44px;height:44px;border-radius:12px;
+  background:rgba(242,201,76,.1);border:1px solid rgba(242,201,76,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;flex-shrink:0;
+}
+.why-item h5{font-weight:600;margin-bottom:4px;color:#fff;}
+.why-item p{font-size:.84rem;color:var(--muted);line-height:1.6;}
+
+/* MEMBERSHIP */
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px;}
+.plan-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:22px;padding:34px 26px;
+  transition:.3s;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.plan-card.featured{
+  border-color:var(--gold);
+  background:linear-gradient(160deg,#1c1800 0%,var(--card) 60%);
+}
+.plan-badge{
+  position:absolute;top:16px;right:16px;
+  font-size:.7rem;letter-spacing:2px;text-transform:uppercase;
+  background:var(--gold);color:#000;
+  padding:4px 10px;border-radius:20px;font-weight:700;
+}
+.plan-name{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#fff;margin-bottom:6px;}
+.plan-price{font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:800;color:var(--gold);line-height:1;}
+.plan-period{font-size:.82rem;color:var(--muted);margin-bottom:20px;}
+.plan-features{list-style:none;flex:1;margin-bottom:24px;}
+.plan-features li{font-size:.88rem;color:#c0c0c0;padding:7px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.plan-features li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0;}
+.plan-features li:last-child{border-bottom:none;}
+.plan-btn{
+  width:100%;padding:12px;border-radius:30px;
+  font-weight:600;font-size:.9rem;cursor:pointer;
+  border:1px solid var(--gold);
+  background:transparent;color:var(--gold);
+  transition:.25s;letter-spacing:.5px;
+}
+.plan-card.featured .plan-btn{background:var(--gold);color:#000;border-color:var(--gold);}
+.plan-btn:hover{background:var(--gold);color:#000;}
+
+/* CONTACT */
+#contact{background:var(--bg2);}
+.contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:50px;align-items:start;}
+.contact-info h4{font-size:1.1rem;font-weight:600;margin-bottom:20px;color:#fff;}
+.info-item{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;}
+.info-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:rgba(242,201,76,.08);border:1px solid rgba(242,201,76,.15);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;
+}
+.info-item h6{font-weight:600;font-size:.88rem;color:#fff;margin-bottom:2px;}
+.info-item p{font-size:.84rem;color:var(--muted);}
+.map-wrap{border-radius:16px;overflow:hidden;border:1px solid var(--border);margin-top:24px;}
+.map-wrap iframe{width:100%;height:220px;border:0;display:block;filter:grayscale(40%) invert(90%) hue-rotate(160deg);}
+
+/* FORM */
+.form-group{margin-bottom:14px;}
+.form-group input,.form-group textarea,.form-group select{
+  width:100%;padding:13px 16px;
+  background:#0d0d0d;border:1px solid var(--border);
+  border-radius:12px;color:var(--text);
+  font-size:.92rem;font-family:'Inter',sans-serif;
+  transition:.2s;outline:none;
+}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{
+  border-color:rgba(242,201,76,.5);
+  box-shadow:0 0 0 3px rgba(242,201,76,.08);
+}
+.form-group select option{background:#111;}
+.form-group textarea{resize:vertical;min-height:110px;}
+.form-submit{
+  width:100%;padding:14px;
+  background:var(--gold);color:#000;
+  border:none;border-radius:30px;
+  font-weight:700;font-size:.95rem;
+  cursor:pointer;transition:.25s;letter-spacing:.5px;
+}
+.form-submit:hover{background:var(--gold-dark);}
+.form-submit:disabled{opacity:.6;cursor:not-allowed;}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#1a1a1a;border:1px solid var(--gold);border-radius:12px;
+  padding:14px 24px;color:#fff;font-size:.9rem;font-weight:500;
+  opacity:0;transition:.4s;z-index:2000;pointer-events:none;
+  display:flex;align-items:center;gap:10px;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.error{border-color:#e55;color:#faa;}
+
+/* FLOAT BUTTONS */
+.float-btn{
+  position:fixed;right:20px;
+  width:52px;height:52px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;z-index:1000;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);
+  transition:.25s;
+}
+.float-btn:hover{transform:scale(1.1);}
+.call-btn{bottom:90px;background:var(--gold);color:#000;}
+.whatsapp-btn{bottom:30px;background:#25D366;color:#fff;}
+
+/* FOOTER */
+footer{
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:40px 6% 30px;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:30px;
+}
+.footer-brand .logo{font-size:1.4rem;margin-bottom:12px;display:block;}
+.footer-brand p{font-size:.84rem;color:var(--muted);line-height:1.7;}
+.footer-col h6{font-size:.8rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.footer-col a,.footer-col p{display:block;font-size:.85rem;color:var(--muted);margin-bottom:8px;transition:.2s;}
+.footer-col a:hover{color:var(--gold);}
+.footer-bottom{
+  background:var(--bg2);padding:16px 6%;
+  text-align:center;font-size:.82rem;color:#555;
+  border-top:1px solid var(--border);
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-8px);}}
+.reveal{opacity:0;transform:translateY(28px);transition:.7s ease;}
+.reveal.visible{opacity:1;transform:none;}
+
+/* MOBILE */
+@media(max-width:900px){
+  .about-inner,.contact-grid{grid-template-columns:1fr;}
+  footer{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:640px){
+  nav{display:none;}
+  .hamburger{display:flex;}
+  footer{grid-template-columns:1fr;}
+  .footer-brand{grid-column:1;}
+  section{padding:70px 5%;}
+  .hero{padding:0 5% 140px;}
+  .hero-stats{flex-wrap:wrap;}
+  .hero-stat{flex:1 1 50%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .hero h2{font-size:clamp(3rem,16vw,5rem);}
+}
+</style>
+</head>
+<body>
+
+<header id="header">
+  <a href="#home" class="logo">Power<span>Zone</span></a>
+  <nav id="desktop-nav">
+    <a href="#home" class="active">Home</a>
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#membership">Membership</a>
+    <a href="#contact">Contact</a>
+    <a href="/admin" style="color:var(--gold);border:1px solid rgba(242,201,76,.3);padding:7px 16px;border-radius:20px;font-size:.82rem;">Admin</a>
+  </nav>
+  <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</header>
+
+<div class="mobile-nav" id="mobile-nav">
+  <a href="#home" onclick="closeMenu()">Home</a>
+  <a href="#about" onclick="closeMenu()">About</a>
+  <a href="#services" onclick="closeMenu()">Services</a>
+  <a href="#membership" onclick="closeMenu()">Membership</a>
+  <a href="#contact" onclick="closeMenu()">Contact</a>
+  <a href="/admin" style="color:var(--gold);">Admin Panel</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <span>Panagar, Madhya Pradesh</span>
+    </div>
+    <div class="hero-motivate">No Pain &nbsp;·&nbsp; No Gain &nbsp;·&nbsp; No Glory</div>
+    <h2>
+      <span class="outline">Push</span><br>
+      Your<br>
+      <span class="gold">Limits</span>
+    </h2>
+    <div class="hero-sub">Train. Sweat. Achieve.</div>
+    <div class="hero-divider"></div>
+    <p>A premium fitness space designed for focused training, professional guidance, and real results. Join Power Zone — where champions are built.</p>
+    <div class="btn-group">
+      <a href="#membership" class="btn btn-primary">Join Now &#8594;</a>
+      <a href="#contact" class="btn btn-outline">Get Free Trial</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div><div class="hero-stat-num">200+</div><div class="hero-stat-lbl">Active Members</div></div>
+    </div>
+    <div class="hero-stat">
+      <div><div class="hero-stat-num">5+</div><div class="hero-stat-lbl">Years of Excellence</div></div>
+    </div>
+    <div class="hero-stat">
+      <div><div class="hero-stat-num">5</div><div class="hero-stat-lbl">Training Programs</div></div>
+    </div>
+    <div class="hero-stat">
+      <div><div class="hero-stat-num">100%</div><div class="hero-stat-lbl">Dedicated Coaching</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-inner reveal">
+    <div>
+      <div class="section-label">About Us</div>
+      <h2 class="section-title" style="margin-bottom:24px;">Built for<br>Serious <span style="color:var(--gold)">Athletes</span></h2>
+      <div class="about-text">
+        <p>Power Zone – The Fitness Club is built for people who value quality training, professional guidance, and a clean, motivating environment.</p>
+        <p>We believe true fitness comes from discipline, balance, and consistency. Whether you're just starting out or pushing your limits, Power Zone gives you the tools and support to reach your goals.</p>
+      </div>
+    </div>
+    <div class="about-stats">
+      <div class="stat-box"><div class="num">200+</div><div class="lbl">Active Members</div></div>
+      <div class="stat-box"><div class="num">5+</div><div class="lbl">Years Running</div></div>
+      <div class="stat-box"><div class="num">1</div><div class="lbl">Expert Trainer</div></div>
+      <div class="stat-box"><div class="num">100%</div><div class="lbl">Dedication</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-head reveal">
+    <div class="section-label">What We Offer</div>
+    <h2 class="section-title">Our <span style="color:var(--gold)">Services</span></h2>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="service-icon">🏋️</div>
+      <h4>Weight Training</h4>
+      <p>Build strength with a full range of free weights and machines, guided by expert programming.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">🏃</div>
+      <h4>Cardio Training</h4>
+      <p>Modern cardio equipment to improve endurance, burn fat, and boost cardiovascular health.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">👤</div>
+      <h4>Personal Training</h4>
+      <p>One-on-one coaching tailored to your body type, goals, and schedule.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">💪</div>
+      <h4>Muscle Building</h4>
+      <p>Structured hypertrophy programs with nutrition guidance to maximize muscle growth.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="service-icon">🔥</div>
+      <h4>Fat Loss Programs</h4>
+      <p>Science-backed fat loss protocols combining resistance training and cardio.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section id="why">
+  <div class="section-head reveal">
+    <div class="section-label">Why Power Zone</div>
+    <h2 class="section-title">Why Choose <span style="color:var(--gold)">Us</span></h2>
+  </div>
+  <div class="why-grid">
+    <div class="why-item reveal">
+      <div class="why-icon">⚙️</div>
+      <div><h5>Modern Equipment</h5><p>Well-maintained, up-to-date machines and free weights for every muscle group.</p></div>
+    </div>
+    <div class="why-item reveal">
+      <div class="why-icon">🎯</div>
+      <div><h5>Expert Guidance</h5><p>Experienced and friendly trainer who knows how to get you results.</p></div>
+    </div>
+    <div class="why-item reveal">
+      <div class="why-icon">✨</div>
+      <div><h5>Clean Environment</h5><p>Hygienic, well-lit workout space maintained to the highest standards.</p></div>
+    </div>
+    <div class="why-item reveal">
+      <div class="why-icon">💰</div>
+      <div><h5>Flexible Plans</h5><p>Affordable memberships with options to suit every budget and commitment level.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- MEMBERSHIP -->
+<section id="membership">
+  <div class="section-head reveal" style="text-align:center;">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-title">Membership <span style="color:var(--gold)">Plans</span></h2>
+    <p style="color:var(--muted);margin-top:10px;font-size:.95rem;">Choose the plan that works for you</p>
+  </div>
+  <div class="plans-grid">
+    <div class="plan-card reveal">
+      <div class="plan-name">Basic</div>
+      <div class="plan-price">₹700</div>
+      <div class="plan-period">per month</div>
+      <ul class="plan-features">
+        <li>Gym floor access</li>
+        <li>Cardio equipment</li>
+        <li>Free weights</li>
+      </ul>
+      <button class="plan-btn" onclick="enquirePlan('Basic')">Enquire Now</button>
+    </div>
+    <div class="plan-card reveal">
+      <div class="plan-name">Standard</div>
+      <div class="plan-price">₹2000</div>
+      <div class="plan-period">per 3 months</div>
+      <ul class="plan-features">
+        <li>All Basic features</li>
+        <li>Diet consultation</li>
+        <li>Progress tracking</li>
+      </ul>
+      <button class="plan-btn" onclick="enquirePlan('Standard')">Enquire Now</button>
+    </div>
+    <div class="plan-card featured reveal">
+      <div class="plan-badge">Popular</div>
+      <div class="plan-name">Premium</div>
+      <div class="plan-price">₹3900</div>
+      <div class="plan-period">per 6 months</div>
+      <ul class="plan-features">
+        <li>All Standard features</li>
+        <li>Personal training sessions</li>
+        <li>Workout plan included</li>
+        <li>Priority support</li>
+      </ul>
+      <button class="plan-btn" onclick="enquirePlan('Premium')">Enquire Now</button>
+    </div>
+    <div class="plan-card reveal">
+      <div class="plan-name">Gold</div>
+      <div class="plan-price">₹7800</div>
+      <div class="plan-period">per year</div>
+      <ul class="plan-features">
+        <li>All Premium features</li>
+        <li>Unlimited PT sessions</li>
+        <li>Nutrition plan</li>
+        <li>Best value</li>
+      </ul>
+      <button class="plan-btn" onclick="enquirePlan('Gold')">Enquire Now</button>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-grid">
+    <div class="reveal">
+      <div class="section-label">Get In Touch</div>
+      <h2 class="section-title" style="margin-bottom:28px;">Contact <span style="color:var(--gold)">Us</span></h2>
+      <div class="info-item">
+        <div class="info-icon">📍</div>
+        <div><h6>Location</h6><p>Panagar, Madhya Pradesh 483220</p></div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">📞</div>
+        <div><h6>Phone</h6><p><a href="tel:+919303999966" style="color:var(--gold);">+91 93039 99966</a></p></div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">🕐</div>
+        <div><h6>Hours</h6><p>Mon – Sat: 6:00 AM – 10:00 PM<br>Sunday: 7:00 AM – 8:00 PM</p></div>
+      </div>
+      <div class="map-wrap">
+        <iframe src="https://maps.google.com/maps?q=23.2888656,79.9954056&z=17&output=embed" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+    <div class="reveal">
+      <h4 style="font-weight:600;margin-bottom:22px;color:#fff;">Send us a message</h4>
+      <form id="contact-form" onsubmit="submitForm(event)">
+        <div class="form-group">
+          <input type="text" id="f-name" placeholder="Your Name *" required>
+        </div>
+        <div class="form-group">
+          <input type="tel" id="f-phone" placeholder="Phone Number *" required>
+        </div>
+        <div class="form-group">
+          <select id="f-plan">
+            <option value="">Interested in a plan? (optional)</option>
+            <option value="Basic">Basic – ₹700/month</option>
+            <option value="Standard">Standard – ₹2000/3 months</option>
+            <option value="Premium">Premium – ₹3900/6 months</option>
+            <option value="Gold">Gold – ₹7800/year</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <textarea id="f-message" placeholder="Your message..." rows="4"></textarea>
+        </div>
+        <button type="submit" class="form-submit" id="submit-btn">Send Message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">
+    <span class="logo">Power<span>Zone</span></span>
+    <p>A premium fitness space built for focused training and real results in Panagar, MP.</p>
+  </div>
+  <div class="footer-col">
+    <h6>Quick Links</h6>
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#membership">Membership</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="footer-col">
+    <h6>Contact</h6>
+    <p>Panagar, MP 483220<br>NEAR POLICE STATION 
+    </p>
+    <a href="tel:+919303999966">+91 8253000958</a>
+    <a href="https://wa.me/8253000958">WhatsApp Us</a>
+  </div>
+</footer>
+<div class="footer-bottom">© 2025 Power Zone – The Fitness Club, Panagar. All rights reserved.</div>
+
+<a href="tel:+919303999966" class="float-btn call-btn" title="Call Us">📞</a>
+<a href="https://wa.me/919303999966" class="float-btn whatsapp-btn" title="WhatsApp">💬</a>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// MOBILE MENU
+function toggleMenu(){
+  document.getElementById('hamburger').classList.toggle('open');
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+function closeMenu(){
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('mobile-nav').classList.remove('open');
+}
+
+// TOAST
+function showToast(msg, isError=false){
+  const t = document.getElementById('toast');
+  t.textContent = (isError ? '❌ ' : '✅ ') + msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// PLAN ENQUIRY
+function enquirePlan(plan){
+  document.getElementById('f-plan').value = plan;
+  document.getElementById('contact').scrollIntoView({behavior:'smooth'});
+  setTimeout(()=>document.getElementById('f-name').focus(), 700);
+}
+
+// FORM SUBMIT
+async function submitForm(e){
+  e.preventDefault();
+  const name = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const message = document.getElementById('f-message').value.trim();
+  const plan = document.getElementById('f-plan').value;
+  if(!name){showToast('Please enter your name',true);return;}
+  if(!phone){showToast('Please enter your phone number',true);return;}
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try{
+    const res = await fetch('/api/contact',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,phone,message,plan})
+    });
+    const data = await res.json();
+    if(data.success){
+      showToast('Message sent! We\'ll call you soon.');
+      document.getElementById('contact-form').reset();
+    } else {
+      showToast(data.error || 'Something went wrong',true);
+    }
+  } catch(err){
+    showToast('Could not connect. Please call us directly.',true);
+  }
+  btn.disabled = false;
+  btn.textContent = 'Send Message';
+}
+
+// SCROLL REVEAL
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting) e.target.classList.add('visible');});
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// ACTIVE NAV
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('#desktop-nav a[href^="#"]');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(s=>{
+    if(window.scrollY >= s.offsetTop - 120) cur=s.id;
+  });
+  navLinks.forEach(a=>{
+    a.classList.toggle('active', a.getAttribute('href')==='#'+cur);
+  });
+});
+</script>
+</body>
+</html>
