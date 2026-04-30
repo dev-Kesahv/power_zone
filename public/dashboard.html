@@ -70,10 +70,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 <body>
 <header>
   <span class="logo">Power<span>Zone</span> <span style="color:var(--muted);font-size:1rem;font-weight:400;">Dashboard</span></span>
-  <div style="display:flex;gap:10px;align-items:center;">
-    <a href="/">← Back to Site</a>
-    <button onclick="logout()" style="font-size:.85rem;color:#e55;border:1px solid rgba(229,85,85,.3);padding:7px 16px;border-radius:20px;background:none;cursor:pointer;transition:.2s;font-family:inherit;">Logout</button>
-  </div>
+  <a href="/">← Back to Site</a>
 </header>
 
 <main>
@@ -107,11 +104,11 @@ let allContacts = [];
 
 async function loadData(){
   try{
-    const [cr, sr] = await Promise.all([
-      fetch('/api/contacts').then(r=>{ if(r.status===401){ window.location.href='/login'; throw new Error('unauth');} return r.json();}),
-      fetch('/api/stats').then(r=>{ if(r.status===401){ window.location.href='/login'; throw new Error('unauth');} return r.json();})
+    const [mr, sr] = await Promise.all([
+      fetch('/api/members').then(r=>r.json()),
+      fetch('/api/stats').then(r=>r.json())
     ]);
-    allContacts = cr;
+    allContacts = mr;
     document.getElementById('s-total').textContent = sr.total;
     document.getElementById('s-basic').textContent = sr.byPlan.Basic||0;
     document.getElementById('s-standard').textContent = sr.byPlan.Standard||0;
@@ -168,11 +165,6 @@ function formatDate(iso){
 
 loadData();
 setInterval(loadData, 30000);
-
-async function logout(){
-  await fetch('/api/logout', { method: 'POST' });
-  window.location.href = '/login';
-}
 </script>
 </body>
 </html>

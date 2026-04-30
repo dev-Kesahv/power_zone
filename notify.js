@@ -16,6 +16,9 @@ async function sendEmail(contact) {
     },
   });
 
+  const SITE_URL = process.env.SITE_URL || `http://localhost:${process.env.PORT || 3000}`;
+  const acceptUrl = `${SITE_URL}/api/accept?id=${contact._id}`;
+
   const planLine = contact.plan ? `Plan Interested  : ${contact.plan}` : '';
   const msgLine  = contact.message ? `Message          : ${contact.message}` : '';
 
@@ -33,8 +36,7 @@ ${msgLine}
 
 Time             : ${new Date(contact.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
 
-──────────────────────────────
-View all enquiries: http://localhost:3000/admin
+Accept this member: ${acceptUrl}
     `.trim(),
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;background:#1a1a1a;color:#eaeaea;border-radius:12px;overflow:hidden;">
@@ -49,9 +51,10 @@ View all enquiries: http://localhost:3000/admin
             ${contact.message ? `<tr><td style="padding:8px 0;color:#999;vertical-align:top;">Message</td><td style="padding:8px 0;">${contact.message}</td></tr>` : ''}
             <tr><td style="padding:8px 0;color:#999;">Time</td><td style="padding:8px 0;color:#888;">${new Date(contact.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td></tr>
           </table>
-          <div style="margin-top:20px;">
-            <a href="http://localhost:3000/admin" style="background:#f2c94c;color:#000;padding:10px 22px;border-radius:20px;text-decoration:none;font-weight:700;font-size:.88rem;">View Admin Panel →</a>
+          <div style="margin-top:24px;text-align:center;">
+            <a href="${acceptUrl}" style="background:#f2c94c;color:#000;padding:12px 32px;border-radius:25px;text-decoration:none;font-weight:700;font-size:1rem;display:inline-block;">✅ Accept Member</a>
           </div>
+          <p style="margin-top:16px;font-size:.8rem;color:#555;text-align:center;">Click the button above to accept and list this member on the dashboard.</p>
         </div>
       </div>
     `,

@@ -1,34 +1,33 @@
-// database.js — uses NeDB locally, MongoDB Atlas in production (Vercel)
+// database.js — NeDB locally, MongoDB Atlas in production (Vercel)
 
 const isVercel = process.env.VERCEL === '1';
 
-let contacts;
-
 if (isVercel || process.env.MONGODB_URI) {
   // ── PRODUCTION: MongoDB Atlas ────────────────────────────────────────────
-  const { MongoClient } = require('mongodb');
-  const uri = process.env.MONGODB_URI;
-  const client = new MongoClient(uri);
-  let connected = false;
+  const { MongoClient, ObjectId } = require('mongodb');
+  const client = new MongoClient(process.env.MONGODB_URI);
+  let col;
 
   async function connectDB() {
-    if (!connected) {
+    if (!col) {
       await client.connect();
-      const db = client.db('powerzone');
-      contacts = db.collection('contacts');
-      connected = true;
+      col = client.db('powerzone').collection('contacts');
       console.log('✅ Connected to MongoDB Atlas');
     }
     return {
-      find: (q) => ({ sort: () => ({ toArray: () => contacts.find(q || {}).sort({ createdAt: -1 }).toArray() }), toArray: () => contacts.find(q || {}).toArray() }),
-      insertOne: (doc) => contacts.insertOne(doc),
+      insertOne: (doc) => col.insertOne(doc),
+      find: (q) => ({
+        sort: (s) => ({ toArray: () => col.find(q || {}).sort(s || {}).toArray() }),
+        toArray: () => col.find(q || {}).toArray(),
+      }),
+      updateOne: (id, update) => col.updateOne({ _id: new ObjectId(id) }, update),
     };
   }
 
-  module.exports = { connectDB, getContacts: () => contacts };
+  module.exports = { connectDB };
 
 } else {
-  // ── LOCAL DEV: NeDB (file-based, no install needed) ─────────────────────
+  // ── LOCAL DEV: NeDB (file-based, no MongoDB install needed) ─────────────
   const path = require('path');
   const Datastore = require('nedb-promises');
 
@@ -37,23 +36,25 @@ if (isVercel || process.env.MONGODB_URI) {
     autoload: true,
   });
 
-  // Wrap NeDB to match the MongoDB API used in server.js
-  const adapter = {
-    insertOne: async (doc) => {
-      const inserted = await db.insert(doc);
-      return { insertedId: inserted._id };
-    },
-    find: (query) => ({
-      sort: (_s) => ({
-        toArray: () => db.find(query || {}).sort({ createdAt: -1 }),
-      }),
-      toArray: () => db.find(query || {}),
-    }),
-  };
-
   async function connectDB() {
-    return adapter;
+    return {
+      insertOne: async (doc) => {
+        const inserted = await db.insert(doc);
+        return { insertedId: inserted._id };
+      },
+      find: (query) => ({
+        sort: (s) => ({
+          toArray: async () => {
+            const results = await db.find(query || {});
+            // Sort by createdAt descending
+            return results.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          },
+        }),
+        toArray: () => db.find(query || {}),
+      }),
+      updateOne: (id, update) => db.update({ _id: id }, update, {}),
+    };
   }
 
-  module.exports = { connectDB, getContacts: () => adapter };
+  module.exports = { connectDB };
 }
