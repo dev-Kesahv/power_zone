@@ -21,6 +21,7 @@ if (isVercel || process.env.MONGODB_URI) {
         toArray: () => col.find(q || {}).toArray(),
       }),
       updateOne: (id, update) => col.updateOne({ _id: new ObjectId(id) }, update),
+      deleteOne: (id) => col.deleteOne({ _id: new ObjectId(id) }),
     };
   }
 
@@ -52,7 +53,8 @@ if (isVercel || process.env.MONGODB_URI) {
         }),
         toArray: () => db.find(query || {}),
       }),
-      updateOne: (id, update) => db.update({ _id: id }, update, {}),
+      updateOne: (id, update) => db.update({ _id: id }, update, { multi: false }),
+      deleteOne: (id) => db.remove({ _id: id }, {}),
     };
   }
 

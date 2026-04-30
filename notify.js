@@ -39,22 +39,42 @@ Time             : ${new Date(contact.createdAt).toLocaleString('en-IN', { timeZ
 Accept this member: ${acceptUrl}
     `.trim(),
     html: `
-      <div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;background:#1a1a1a;color:#eaeaea;border-radius:12px;overflow:hidden;">
-        <div style="background:#f2c94c;padding:20px 28px;">
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;">
+        <div style="background:#f2c94c;padding:22px 28px;">
           <h2 style="margin:0;color:#000;font-size:1.3rem;">🏋️ New Enquiry — Power Zone</h2>
         </div>
-        <div style="padding:24px 28px;">
-          <table style="width:100%;border-collapse:collapse;font-size:.95rem;">
-            <tr><td style="padding:8px 0;color:#999;width:140px;">Name</td><td style="padding:8px 0;font-weight:600;">${contact.name}</td></tr>
-            <tr><td style="padding:8px 0;color:#999;">Phone</td><td style="padding:8px 0;"><a href="tel:${contact.phone}" style="color:#f2c94c;">${contact.phone}</a></td></tr>
-            ${contact.plan ? `<tr><td style="padding:8px 0;color:#999;">Plan</td><td style="padding:8px 0;color:#f2c94c;font-weight:600;">${contact.plan}</td></tr>` : ''}
-            ${contact.message ? `<tr><td style="padding:8px 0;color:#999;vertical-align:top;">Message</td><td style="padding:8px 0;">${contact.message}</td></tr>` : ''}
-            <tr><td style="padding:8px 0;color:#999;">Time</td><td style="padding:8px 0;color:#888;">${new Date(contact.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td></tr>
+        <div style="background:#ffffff;padding:28px;">
+          <table style="width:100%;border-collapse:collapse;font-size:.95rem;color:#111;">
+            <tr style="border-bottom:1px solid #f0f0f0;">
+              <td style="padding:12px 0;color:#666;width:130px;font-weight:600;">Name</td>
+              <td style="padding:12px 0;font-weight:700;color:#111;">${contact.name}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #f0f0f0;">
+              <td style="padding:12px 0;color:#666;font-weight:600;">Phone</td>
+              <td style="padding:12px 0;"><a href="tel:${contact.phone}" style="color:#b8960a;font-weight:600;text-decoration:none;">${contact.phone}</a></td>
+            </tr>
+            ${contact.plan ? `
+            <tr style="border-bottom:1px solid #f0f0f0;">
+              <td style="padding:12px 0;color:#666;font-weight:600;">Plan</td>
+              <td style="padding:12px 0;color:#b8960a;font-weight:700;">${contact.plan}</td>
+            </tr>` : ''}
+            ${contact.message ? `
+            <tr style="border-bottom:1px solid #f0f0f0;">
+              <td style="padding:12px 0;color:#666;font-weight:600;vertical-align:top;">Message</td>
+              <td style="padding:12px 0;color:#333;line-height:1.6;">${contact.message}</td>
+            </tr>` : ''}
+            <tr>
+              <td style="padding:12px 0;color:#666;font-weight:600;">Time</td>
+              <td style="padding:12px 0;color:#888;">${new Date(contact.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
+            </tr>
           </table>
-          <div style="margin-top:24px;text-align:center;">
-            <a href="${acceptUrl}" style="background:#f2c94c;color:#000;padding:12px 32px;border-radius:25px;text-decoration:none;font-weight:700;font-size:1rem;display:inline-block;">✅ Accept Member</a>
+          <div style="margin-top:28px;text-align:center;">
+            <a href="${acceptUrl}" style="background:#f2c94c;color:#000;padding:14px 36px;border-radius:25px;text-decoration:none;font-weight:700;font-size:1rem;display:inline-block;">✅ Accept Member</a>
           </div>
-          <p style="margin-top:16px;font-size:.8rem;color:#555;text-align:center;">Click the button above to accept and list this member on the dashboard.</p>
+          <p style="margin-top:14px;font-size:.8rem;color:#aaa;text-align:center;">Click the button above to accept and list this member on your dashboard.</p>
+        </div>
+        <div style="background:#f9f9f9;padding:12px 28px;text-align:center;font-size:.78rem;color:#aaa;border-top:1px solid #e0e0e0;">
+          Power Zone — The Fitness Club, Panagar, MP
         </div>
       </div>
     `,

@@ -28,6 +28,15 @@ main{padding:40px 5%;}
 .stat .num{font-family:'Barlow Condensed',sans-serif;font-size:2.2rem;font-weight:800;color:var(--gold);}
 .stat .lbl{font-size:.8rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px;}
 
+/* TABS */
+.tabs{display:flex;gap:10px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:12px;}
+.tab{
+  padding:10px 24px;border-radius:25px;cursor:pointer;font-size:.9rem;font-weight:600;
+  transition:.2s;border:1px solid transparent;color:var(--muted);
+}
+.tab.active{background:var(--gold);color:#000;border-color:var(--gold);}
+.tab:not(.active):hover{background:rgba(255,255,255,.05);color:var(--text);}
+
 /* TABLE */
 .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
 .table-header{
@@ -45,26 +54,31 @@ th{padding:12px 20px;text-align:left;font-size:.75rem;letter-spacing:2px;text-tr
 td{padding:14px 20px;font-size:.88rem;border-bottom:1px solid var(--border);vertical-align:top;}
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(255,255,255,.02);}
+
 .badge{
   display:inline-block;font-size:.75rem;font-weight:600;
   padding:3px 10px;border-radius:12px;
 }
-.badge-basic{background:rgba(100,149,237,.15);color:#6495ed;}
-.badge-standard{background:rgba(152,251,152,.12);color:#5cb85c;}
-.badge-premium{background:rgba(242,201,76,.15);color:var(--gold);}
-.badge-gold{background:rgba(255,165,0,.15);color:#ffa500;}
-.badge-general{background:rgba(150,150,150,.15);color:#999;}
+.badge-pending{background:rgba(242,201,76,.1);color:var(--gold);border:1px solid rgba(242,201,76,.3);}
+.badge-accepted{background:rgba(152,251,152,.1);color:#5cb85c;border:1px solid rgba(152,251,152,.3);}
+
 .empty{padding:40px;text-align:center;color:var(--muted);font-size:.9rem;}
+
 .refresh-btn{
   padding:8px 18px;background:transparent;border:1px solid var(--border);
   border-radius:8px;color:var(--muted);cursor:pointer;font-size:.84rem;transition:.2s;
 }
 .refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
-.delete-btn{
-  background:none;border:none;color:#e55;cursor:pointer;font-size:.8rem;padding:4px 8px;
-  border-radius:6px;transition:.2s;
+
+/* ACTIONS */
+.action-btn{
+  padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:700;
+  cursor:pointer;transition:.2s;border:none;outline:none;
 }
-.delete-btn:hover{background:rgba(229,85,85,.1);}
+.btn-accept{background:var(--gold);color:#000;margin-right:8px;}
+.btn-accept:hover{background:#d4af37;}
+.btn-delete{background:rgba(229,85,85,.1);color:#e55;border:1px solid rgba(229,85,85,.2);}
+.btn-delete:hover{background:rgba(229,85,85,.2);}
 </style>
 </head>
 <body>
@@ -77,17 +91,18 @@ tr:hover td{background:rgba(255,255,255,.02);}
   <div class="page-title">Dashboard <span>Overview</span></div>
 
   <div class="stats-row" id="stats-row">
-    <div class="stat"><div class="num" id="s-total">—</div><div class="lbl">Total Enquiries</div></div>
-    <div class="stat"><div class="num" id="s-basic">—</div><div class="lbl">Basic</div></div>
-    <div class="stat"><div class="num" id="s-standard">—</div><div class="lbl">Standard</div></div>
-    <div class="stat"><div class="num" id="s-premium">—</div><div class="lbl">Premium</div></div>
-    <div class="stat"><div class="num" id="s-gold">—</div><div class="lbl">Gold</div></div>
-    <div class="stat"><div class="num" id="s-general">—</div><div class="lbl">General</div></div>
+    <div class="stat"><div class="num" id="s-total">—</div><div class="lbl">Active Members</div></div>
+    <div class="stat"><div class="num" id="s-pending">—</div><div class="lbl">New Requests</div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-accepted" onclick="switchTab('accepted')">Active Members</div>
+    <div class="tab" id="tab-pending" onclick="switchTab('pending')">New Requests</div>
   </div>
 
   <div class="table-wrap">
     <div class="table-header">
-      <h3>Active Members</h3>
+      <h3 id="table-title">Active Members</h3>
       <div style="display:flex;gap:10px;align-items:center;">
         <input class="search-box" id="search" placeholder="Search name..." oninput="filterTable()">
         <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
@@ -100,52 +115,91 @@ tr:hover td{background:rgba(255,255,255,.02);}
 </main>
 
 <script>
-let allContacts = [];
+let allData = [];
+let currentTab = 'accepted';
 
 async function loadData(){
   try{
+    const ts = Date.now();
     const [mr, sr] = await Promise.all([
-      fetch('/api/members').then(r=>r.json()),
-      fetch('/api/stats').then(r=>r.json())
+      fetch(`/api/members?t=${ts}`).then(r=>r.json()),
+      fetch(`/api/stats?t=${ts}`).then(r=>r.json())
     ]);
-    allContacts = mr;
+    allData = mr;
+    
+    // Update stats
     document.getElementById('s-total').textContent = sr.total;
-    document.getElementById('s-basic').textContent = sr.byPlan.Basic||0;
-    document.getElementById('s-standard').textContent = sr.byPlan.Standard||0;
-    document.getElementById('s-premium').textContent = sr.byPlan.Premium||0;
-    document.getElementById('s-gold').textContent = sr.byPlan.Gold||0;
-    document.getElementById('s-general').textContent = sr.byPlan.General||0;
-    renderTable(allContacts);
+    document.getElementById('s-pending').textContent = allData.filter(d=>d.status === 'pending').length;
+    
+    renderTable();
   } catch(e){
-    document.getElementById('table-container').innerHTML='<div class="empty">Failed to load data. Is the server running?</div>';
+    console.error(e);
+    document.getElementById('table-container').innerHTML='<div class="empty">Failed to load data.</div>';
   }
 }
 
+function switchTab(tab){
+  currentTab = tab;
+  document.getElementById('tab-accepted').classList.toggle('active', tab === 'accepted');
+  document.getElementById('tab-pending').classList.toggle('active', tab === 'pending');
+  document.getElementById('table-title').textContent = tab === 'accepted' ? 'Active Members' : 'New Requests';
+  renderTable();
+}
+
 function renderTable(data){
-  if(!data.length){
-    document.getElementById('table-container').innerHTML='<div class="empty">No members yet. They will appear here once people submit the contact form.</div>';
+  const source = data || allData;
+  const filtered = source.filter(d => d.status === currentTab);
+  
+  if(!filtered.length){
+    const msg = currentTab === 'accepted' ? 'No active members yet.' : 'No new requests.';
+    document.getElementById('table-container').innerHTML=`<div class="empty">${msg}</div>`;
     return;
   }
-  const rows = data.map((c, i)=>`
+
+  const rows = filtered.map((c, i)=>`
     <tr>
       <td style="color:var(--muted);font-size:.8rem;">${i + 1}</td>
-      <td>${esc(c.name)}</td>
-      <td style="color:var(--muted);white-space:nowrap;">${formatDate(c.createdAt)}</td>
+      <td>
+        <div style="font-weight:600;">${esc(c.name)}</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:2px;">${esc(c.phone)}</div>
+      </td>
+      <td style="color:var(--muted);font-size:.82rem;">${formatDate(c.createdAt)}</td>
+      <td style="text-align:right;">
+        ${c.status === 'pending' ? `<button class="action-btn btn-accept" onclick="acceptMember('${c._id}')">Accept</button>` : ''}
+        <button class="action-btn btn-delete" onclick="deleteEntry('${c._id}')">Delete</button>
+      </td>
     </tr>
   `).join('');
+
   document.getElementById('table-container').innerHTML=`
     <table>
       <thead><tr>
-        <th>#</th><th>Member Name</th><th>Joined</th>
+        <th>#</th><th>Member Details</th><th>Date</th><th style="text-align:right;">Actions</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
   `;
 }
 
+async function acceptMember(id){
+  if(!confirm('Accept this member?')) return;
+  try {
+    await fetch(`/api/accept?id=${id}`);
+    loadData();
+  } catch(e) { alert('Failed to accept'); }
+}
+
+async function deleteEntry(id){
+  if(!confirm('Permanently delete this entry?')) return;
+  try {
+    await fetch(`/api/delete?id=${id}`);
+    loadData();
+  } catch(e) { alert('Failed to delete'); }
+}
+
 function filterTable(){
   const q = document.getElementById('search').value.toLowerCase();
-  const filtered = allContacts.filter(c=>
+  const filtered = allData.filter(c=>
     c.name.toLowerCase().includes(q)
   );
   renderTable(filtered);
@@ -159,7 +213,7 @@ function esc(s){
 function formatDate(iso){
   if(!iso) return '—';
   const d = new Date(iso);
-  return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) + ' ' +
+  return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + ' ' +
          d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 }
 

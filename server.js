@@ -48,25 +48,29 @@ app.post('/api/contact', async (req, res) => {
 
 // GET /api/accept?id=xxx — owner clicks Accept button in email
 app.get('/api/accept', async (req, res) => {
-  const { id } = req.query;
+  let { id } = req.query;
   if (!id) return res.status(400).send('Missing id');
+  id = id.trim();
   try {
     const contacts = await connectDB();
-    await contacts.updateOne(id, { $set: { status: 'accepted' } });
+    const result = await contacts.updateOne(id, { $set: { status: 'accepted' } });
+    console.log(`[Accept] ID: ${id} updated. Result:`, result);
     res.send(`
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="UTF-8">
+        <meta http-equiv="refresh" content="2;url=/dashboard">
         <title>Member Accepted – Power Zone</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
         <style>
           *{margin:0;padding:0;box-sizing:border-box;}
           body{background:#111;color:#eaeaea;font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
-          .card{background:#1a1a1a;border:1px solid #252525;border-radius:18px;padding:40px;text-align:center;max-width:400px;}
+          .card{background:#1a1a1a;border:1px solid #252525;border-radius:18px;padding:40px;text-align:center;max-width:420px;}
           .icon{font-size:3rem;margin-bottom:16px;}
           h2{color:#f2c94c;font-size:1.4rem;margin-bottom:10px;}
-          p{color:#777;font-size:.9rem;}
+          p{color:#777;font-size:.9rem;margin-bottom:6px;}
+          .redirect{color:#555;font-size:.8rem;margin-top:16px;}
           a{display:inline-block;margin-top:20px;background:#f2c94c;color:#000;padding:10px 24px;border-radius:20px;text-decoration:none;font-weight:700;}
         </style>
       </head>
@@ -75,7 +79,8 @@ app.get('/api/accept', async (req, res) => {
           <div class="icon">✅</div>
           <h2>Member Accepted!</h2>
           <p>This member is now listed on the Power Zone dashboard.</p>
-          <a href="/dashboard">View Dashboard →</a>
+          <p class="redirect">Redirecting to dashboard in 2 seconds...</p>
+          <a href="/dashboard">Go to Dashboard →</a>
         </div>
       </body>
       </html>
@@ -86,12 +91,12 @@ app.get('/api/accept', async (req, res) => {
   }
 });
 
-// GET /api/members — only accepted members (for dashboard)
+// GET /api/members — all members (pending + accepted)
 app.get('/api/members', async (req, res) => {
   try {
     const contacts = await connectDB();
-    const members = await contacts.find({ status: 'accepted' }).sort({ createdAt: -1 }).toArray();
-    res.json(members);
+    const all = await contacts.find({}).sort({ createdAt: -1 }).toArray();
+    res.json(all);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -111,6 +116,20 @@ app.get('/api/stats', async (req, res) => {
     });
     res.json({ total: all.length, byPlan: stats });
   } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// DELETE /api/delete?id=xxx
+app.get('/api/delete', async (req, res) => {
+  const { id } = req.query;
+  if (!id) return res.status(400).send('Missing id');
+  try {
+    const contacts = await connectDB();
+    await contacts.deleteOne(id);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
