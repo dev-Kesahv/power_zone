@@ -16,9 +16,6 @@ async function sendEmail(contact) {
     },
   });
 
-  const SITE_URL = process.env.SITE_URL || `http://localhost:${process.env.PORT || 3000}`;
-  const acceptUrl = `${SITE_URL}/api/accept?id=${contact._id}`;
-
   const planLine = contact.plan ? `Plan Interested  : ${contact.plan}` : '';
   const msgLine  = contact.message ? `Message          : ${contact.message}` : '';
 
@@ -36,7 +33,7 @@ ${msgLine}
 
 Time             : ${new Date(contact.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
 
-Accept this member: ${acceptUrl}
+View Dashboard to manage: ${process.env.SITE_URL || 'http://localhost:3000'}/dashboard
     `.trim(),
     html: `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;">
@@ -53,11 +50,6 @@ Accept this member: ${acceptUrl}
               <td style="padding:12px 0;color:#666;font-weight:600;">Phone</td>
               <td style="padding:12px 0;"><a href="tel:${contact.phone}" style="color:#b8960a;font-weight:600;text-decoration:none;">${contact.phone}</a></td>
             </tr>
-            ${contact.plan ? `
-            <tr style="border-bottom:1px solid #f0f0f0;">
-              <td style="padding:12px 0;color:#666;font-weight:600;">Plan</td>
-              <td style="padding:12px 0;color:#b8960a;font-weight:700;">${contact.plan}</td>
-            </tr>` : ''}
             ${contact.message ? `
             <tr style="border-bottom:1px solid #f0f0f0;">
               <td style="padding:12px 0;color:#666;font-weight:600;vertical-align:top;">Message</td>
@@ -69,9 +61,8 @@ Accept this member: ${acceptUrl}
             </tr>
           </table>
           <div style="margin-top:28px;text-align:center;">
-            <a href="${acceptUrl}" style="background:#f2c94c;color:#000;padding:14px 36px;border-radius:25px;text-decoration:none;font-weight:700;font-size:1rem;display:inline-block;">✅ Accept Member</a>
+            <a href="${process.env.SITE_URL || 'http://localhost:3000'}/dashboard" style="background:#000;color:#fff;padding:12px 30px;border-radius:25px;text-decoration:none;font-weight:700;font-size:.9rem;display:inline-block;">Open Dashboard →</a>
           </div>
-          <p style="margin-top:14px;font-size:.8rem;color:#aaa;text-align:center;">Click the button above to accept and list this member on your dashboard.</p>
         </div>
         <div style="background:#f9f9f9;padding:12px 28px;text-align:center;font-size:.78rem;color:#aaa;border-top:1px solid #e0e0e0;">
           Power Zone — The Fitness Club, Panagar, MP

@@ -22,7 +22,7 @@ app.use(express.static(staticPath));
 
 // POST /api/contact — save enquiry + notify owner
 app.post('/api/contact', async (req, res) => {
-  const { name, phone, message, plan } = req.body;
+  const { name, phone, message } = req.body;
   if (!name  || !name.trim())  return res.status(400).json({ error: 'Name is required' });
   if (!phone || !phone.trim()) return res.status(400).json({ error: 'Phone is required' });
   try {
@@ -31,8 +31,6 @@ app.post('/api/contact', async (req, res) => {
       name:      name.trim(),
       phone:     phone.trim(),
       message:   (message || '').trim(),
-      plan:      (plan    || '').trim(),
-      status:    'pending',       // ← starts as pending
       createdAt: new Date().toISOString(),
     };
     const doc = await contacts.insertOne(newContact);
@@ -46,52 +44,7 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// GET /api/accept?id=xxx — owner clicks Accept button in email
-app.get('/api/accept', async (req, res) => {
-  let { id } = req.query;
-  if (!id) return res.status(400).send('Missing id');
-  id = id.trim();
-  try {
-    const contacts = await connectDB();
-    const result = await contacts.updateOne(id, { $set: { status: 'accepted' } });
-    console.log(`[Accept] ID: ${id} updated. Result:`, result);
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="refresh" content="2;url=/dashboard">
-        <title>Member Accepted – Power Zone</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-        <style>
-          *{margin:0;padding:0;box-sizing:border-box;}
-          body{background:#111;color:#eaeaea;font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
-          .card{background:#1a1a1a;border:1px solid #252525;border-radius:18px;padding:40px;text-align:center;max-width:420px;}
-          .icon{font-size:3rem;margin-bottom:16px;}
-          h2{color:#f2c94c;font-size:1.4rem;margin-bottom:10px;}
-          p{color:#777;font-size:.9rem;margin-bottom:6px;}
-          .redirect{color:#555;font-size:.8rem;margin-top:16px;}
-          a{display:inline-block;margin-top:20px;background:#f2c94c;color:#000;padding:10px 24px;border-radius:20px;text-decoration:none;font-weight:700;}
-        </style>
-      </head>
-      <body>
-        <div class="card">
-          <div class="icon">✅</div>
-          <h2>Member Accepted!</h2>
-          <p>This member is now listed on the Power Zone dashboard.</p>
-          <p class="redirect">Redirecting to dashboard in 2 seconds...</p>
-          <a href="/dashboard">Go to Dashboard →</a>
-        </div>
-      </body>
-      </html>
-    `);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  }
-});
-
-// GET /api/members — all members (pending + accepted)
+// GET /api/members — all members
 app.get('/api/members', async (req, res) => {
   try {
     const contacts = await connectDB();
@@ -102,19 +55,12 @@ app.get('/api/members', async (req, res) => {
   }
 });
 
-// GET /api/stats — counts of accepted members
+// GET /api/stats — basic stats
 app.get('/api/stats', async (req, res) => {
   try {
     const contacts = await connectDB();
-    const all = await contacts.find({ status: 'accepted' }).toArray();
-    const plans = ['Basic', 'Standard', 'Premium', 'Gold'];
-    const stats = { General: 0 };
-    plans.forEach(p => { stats[p] = 0; });
-    all.forEach(c => {
-      const p = c.plan || 'General';
-      stats[p] = (stats[p] || 0) + 1;
-    });
-    res.json({ total: all.length, byPlan: stats });
+    const all = await contacts.find({}).toArray();
+    res.json({ total: all.length });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -152,7 +98,5 @@ if (!isVercel) {
   app.listen(PORT, () => {
     console.log(`\n  Power Zone server running → http://localhost:${PORT}`);
     console.log(`  Dashboard               → http://localhost:${PORT}/dashboard\n`);
-    if (!process.env.GMAIL_USER)         console.warn('  ⚠️  Email not configured    — add GMAIL_USER to .env');
-    if (!process.env.TWILIO_ACCOUNT_SID) console.warn('  ⚠️  WhatsApp not configured — add TWILIO credentials to .env');
   });
 }

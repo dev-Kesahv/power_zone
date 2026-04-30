@@ -28,15 +28,6 @@ main{padding:40px 5%;}
 .stat .num{font-family:'Barlow Condensed',sans-serif;font-size:2.2rem;font-weight:800;color:var(--gold);}
 .stat .lbl{font-size:.8rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px;}
 
-/* TABS */
-.tabs{display:flex;gap:10px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:12px;}
-.tab{
-  padding:10px 24px;border-radius:25px;cursor:pointer;font-size:.9rem;font-weight:600;
-  transition:.2s;border:1px solid transparent;color:var(--muted);
-}
-.tab.active{background:var(--gold);color:#000;border-color:var(--gold);}
-.tab:not(.active):hover{background:rgba(255,255,255,.05);color:var(--text);}
-
 /* TABLE */
 .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
 .table-header{
@@ -55,13 +46,6 @@ td{padding:14px 20px;font-size:.88rem;border-bottom:1px solid var(--border);vert
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(255,255,255,.02);}
 
-.badge{
-  display:inline-block;font-size:.75rem;font-weight:600;
-  padding:3px 10px;border-radius:12px;
-}
-.badge-pending{background:rgba(242,201,76,.1);color:var(--gold);border:1px solid rgba(242,201,76,.3);}
-.badge-accepted{background:rgba(152,251,152,.1);color:#5cb85c;border:1px solid rgba(152,251,152,.3);}
-
 .empty{padding:40px;text-align:center;color:var(--muted);font-size:.9rem;}
 
 .refresh-btn{
@@ -75,8 +59,6 @@ tr:hover td{background:rgba(255,255,255,.02);}
   padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:700;
   cursor:pointer;transition:.2s;border:none;outline:none;
 }
-.btn-accept{background:var(--gold);color:#000;margin-right:8px;}
-.btn-accept:hover{background:#d4af37;}
 .btn-delete{background:rgba(229,85,85,.1);color:#e55;border:1px solid rgba(229,85,85,.2);}
 .btn-delete:hover{background:rgba(229,85,85,.2);}
 </style>
@@ -91,13 +73,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
   <div class="page-title">Dashboard <span>Overview</span></div>
 
   <div class="stats-row" id="stats-row">
-    <div class="stat"><div class="num" id="s-total">—</div><div class="lbl">Active Members</div></div>
-    <div class="stat"><div class="num" id="s-pending">—</div><div class="lbl">New Requests</div></div>
-  </div>
-
-  <div class="tabs">
-    <div class="tab active" id="tab-accepted" onclick="switchTab('accepted')">Active Members</div>
-    <div class="tab" id="tab-pending" onclick="switchTab('pending')">New Requests</div>
+    <div class="stat"><div class="num" id="s-total">—</div><div class="lbl">Total Members</div></div>
   </div>
 
   <div class="table-wrap">
@@ -116,21 +92,15 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
 <script>
 let allData = [];
-let currentTab = 'accepted';
 
 async function loadData(){
   try{
     const ts = Date.now();
-    const [mr, sr] = await Promise.all([
-      fetch(`/api/members?t=${ts}`).then(r=>r.json()),
-      fetch(`/api/stats?t=${ts}`).then(r=>r.json())
-    ]);
-    allData = mr;
+    const r = await fetch(`/api/members?t=${ts}`);
+    allData = await r.json();
     
     // Update stats
-    document.getElementById('s-total').textContent = sr.total;
-    document.getElementById('s-pending').textContent = allData.filter(d=>d.status === 'pending').length;
-    
+    document.getElementById('s-total').textContent = allData.length;
     renderTable();
   } catch(e){
     console.error(e);
@@ -138,21 +108,11 @@ async function loadData(){
   }
 }
 
-function switchTab(tab){
-  currentTab = tab;
-  document.getElementById('tab-accepted').classList.toggle('active', tab === 'accepted');
-  document.getElementById('tab-pending').classList.toggle('active', tab === 'pending');
-  document.getElementById('table-title').textContent = tab === 'accepted' ? 'Active Members' : 'New Requests';
-  renderTable();
-}
-
 function renderTable(data){
-  const source = data || allData;
-  const filtered = source.filter(d => d.status === currentTab);
+  const filtered = data || allData;
   
   if(!filtered.length){
-    const msg = currentTab === 'accepted' ? 'No active members yet.' : 'No new requests.';
-    document.getElementById('table-container').innerHTML=`<div class="empty">${msg}</div>`;
+    document.getElementById('table-container').innerHTML=`<div class="empty">No members yet. They will appear here once someone fills the contact form.</div>`;
     return;
   }
 
@@ -165,7 +125,6 @@ function renderTable(data){
       </td>
       <td style="color:var(--muted);font-size:.82rem;">${formatDate(c.createdAt)}</td>
       <td style="text-align:right;">
-        ${c.status === 'pending' ? `<button class="action-btn btn-accept" onclick="acceptMember('${c._id}')">Accept</button>` : ''}
         <button class="action-btn btn-delete" onclick="deleteEntry('${c._id}')">Delete</button>
       </td>
     </tr>
@@ -179,14 +138,6 @@ function renderTable(data){
       <tbody>${rows}</tbody>
     </table>
   `;
-}
-
-async function acceptMember(id){
-  if(!confirm('Accept this member?')) return;
-  try {
-    await fetch(`/api/accept?id=${id}`);
-    loadData();
-  } catch(e) { alert('Failed to accept'); }
 }
 
 async function deleteEntry(id){
