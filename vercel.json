@@ -15,7 +15,11 @@
       "dest": "/server.js"
     },
     {
-      "src": "/admin",
+      "src": "/dashboard",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/login",
       "dest": "/server.js"
     },
     {

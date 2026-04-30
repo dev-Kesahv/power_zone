@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors    = require('cors');
+const cookieParser = require('cookie-parser');
 const path    = require('path');
 const { connectDB, getContacts } = require('./database');
 const { notifyOwner }  = require('./notify');
@@ -18,7 +19,19 @@ const staticPath = isVercel
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.static(staticPath));
+
+// Auth middlewares
+const checkAuth = (req, res, next) => {
+  if (req.cookies.auth_token === 'logged_in') next();
+  else res.redirect('/login');
+};
+
+const checkApiAuth = (req, res, next) => {
+  if (req.cookies.auth_token === 'logged_in') next();
+  else res.status(401).json({ error: 'Unauthorized' });
+};
 
 // POST /api/contact — save enquiry + notify owner
 app.post('/api/contact', async (req, res) => {
@@ -46,7 +59,7 @@ app.post('/api/contact', async (req, res) => {
 });
 
 // GET /api/contacts — all enquiries (admin)
-app.get('/api/contacts', async (req, res) => {
+app.get('/api/contacts', checkApiAuth, async (req, res) => {
   try {
     const contacts = await connectDB();
     const all = await contacts.find({}).sort({ createdAt: -1 }).toArray();
@@ -57,7 +70,7 @@ app.get('/api/contacts', async (req, res) => {
 });
 
 // GET /api/stats — plan counts
-app.get('/api/stats', async (req, res) => {
+app.get('/api/stats', checkApiAuth, async (req, res) => {
   try {
     const contacts = await connectDB();
     const all   = await contacts.find({}).toArray();
@@ -74,9 +87,33 @@ app.get('/api/stats', async (req, res) => {
   }
 });
 
-// Admin page
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(staticPath, 'admin.html'));
+// API Login
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+  const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    res.cookie('auth_token', 'logged_in', { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ error: 'Invalid credentials' });
+  }
+});
+
+// API Logout
+app.post('/api/logout', (req, res) => {
+  res.clearCookie('auth_token');
+  res.json({ success: true });
+});
+
+// Login page
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(staticPath, 'login.html'));
+});
+
+// Dashboard page
+app.get('/dashboard', checkAuth, (req, res) => {
+  res.sendFile(path.join(staticPath, 'dashboard.html'));
 });
 
 // Index page
@@ -89,14 +126,11 @@ module.exports = app;
 
 // Local development server
 if (!isVercel) {
-  app.listen(PORT, async () => {
-    await connectDB();
+  app.listen(PORT, () => {
     console.log(`\n  Power Zone server running → http://localhost:${PORT}`);
-    console.log(`  Admin panel             → http://localhost:${PORT}/admin\n`);
+    console.log(`  Login                   → http://localhost:${PORT}/login`);
+    console.log(`  Dashboard               → http://localhost:${PORT}/dashboard\n`);
     if (!process.env.GMAIL_USER)         console.warn('  ⚠️  Email not configured    — add GMAIL_USER to .env');
     if (!process.env.TWILIO_ACCOUNT_SID) console.warn('  ⚠️  WhatsApp not configured — add TWILIO credentials to .env');
-    if (process.env.GMAIL_USER && process.env.TWILIO_ACCOUNT_SID) {
-      console.log('  ✅ Email + WhatsApp notifications active\n');
-    }
   });
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin – Power Zone</title>
+<title>Dashboard – Power Zone</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -69,8 +69,11 @@ tr:hover td{background:rgba(255,255,255,.02);}
 </head>
 <body>
 <header>
-  <span class="logo">Power<span>Zone</span> <span style="color:var(--muted);font-size:1rem;font-weight:400;">Admin</span></span>
-  <a href="/">← Back to Site</a>
+  <span class="logo">Power<span>Zone</span> <span style="color:var(--muted);font-size:1rem;font-weight:400;">Dashboard</span></span>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <a href="/">← Back to Site</a>
+    <button onclick="logout()" style="font-size:.85rem;color:#e55;border:1px solid rgba(229,85,85,.3);padding:7px 16px;border-radius:20px;background:none;cursor:pointer;transition:.2s;font-family:inherit;">Logout</button>
+  </div>
 </header>
 
 <main>
@@ -87,9 +90,9 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
   <div class="table-wrap">
     <div class="table-header">
-      <h3>All Enquiries</h3>
+      <h3>Active Members</h3>
       <div style="display:flex;gap:10px;align-items:center;">
-        <input class="search-box" id="search" placeholder="Search name or phone..." oninput="filterTable()">
+        <input class="search-box" id="search" placeholder="Search name..." oninput="filterTable()">
         <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
       </div>
     </div>
@@ -105,8 +108,8 @@ let allContacts = [];
 async function loadData(){
   try{
     const [cr, sr] = await Promise.all([
-      fetch('/api/contacts').then(r=>r.json()),
-      fetch('/api/stats').then(r=>r.json())
+      fetch('/api/contacts').then(r=>{ if(r.status===401){ window.location.href='/login'; throw new Error('unauth');} return r.json();}),
+      fetch('/api/stats').then(r=>{ if(r.status===401){ window.location.href='/login'; throw new Error('unauth');} return r.json();})
     ]);
     allContacts = cr;
     document.getElementById('s-total').textContent = sr.total;
@@ -123,22 +126,20 @@ async function loadData(){
 
 function renderTable(data){
   if(!data.length){
-    document.getElementById('table-container').innerHTML='<div class="empty">No enquiries yet. They will appear here once people submit the contact form.</div>';
+    document.getElementById('table-container').innerHTML='<div class="empty">No members yet. They will appear here once people submit the contact form.</div>';
     return;
   }
-  const rows = data.map(c=>`
+  const rows = data.map((c, i)=>`
     <tr>
+      <td style="color:var(--muted);font-size:.8rem;">${i + 1}</td>
       <td>${esc(c.name)}</td>
-      <td>${esc(c.phone)}</td>
-      <td>${c.plan ? `<span class="badge badge-${c.plan.toLowerCase()}">${esc(c.plan)}</span>` : '<span class="badge badge-general">General</span>'}</td>
-      <td style="color:var(--muted);max-width:200px;">${esc(c.message)||'—'}</td>
       <td style="color:var(--muted);white-space:nowrap;">${formatDate(c.createdAt)}</td>
     </tr>
   `).join('');
   document.getElementById('table-container').innerHTML=`
     <table>
       <thead><tr>
-        <th>Name</th><th>Phone</th><th>Plan</th><th>Message</th><th>Date</th>
+        <th>#</th><th>Member Name</th><th>Joined</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
@@ -148,7 +149,7 @@ function renderTable(data){
 function filterTable(){
   const q = document.getElementById('search').value.toLowerCase();
   const filtered = allContacts.filter(c=>
-    c.name.toLowerCase().includes(q) || c.phone.includes(q)
+    c.name.toLowerCase().includes(q)
   );
   renderTable(filtered);
 }
@@ -167,6 +168,11 @@ function formatDate(iso){
 
 loadData();
 setInterval(loadData, 30000);
+
+async function logout(){
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/login';
+}
 </script>
 </body>
 </html>
