@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard – Power Zone</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--gold:#f2c94c;--gold-dark:#d4aa33;--bg:#111;--card:#1a1a1a;--border:#252525;--text:#eaeaea;--muted:#777;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+a{text-decoration:none;color:inherit;}
+header{
+  padding:18px 5%;background:#0a0a0a;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:800;color:var(--gold);}
+.logo span{color:#fff;}
+.header-actions{display:flex;gap:15px;align-items:center;}
+header a{font-size:.85rem;color:var(--muted);border:1px solid var(--border);padding:7px 16px;border-radius:20px;transition:.2s;}
+header a:hover{border-color:var(--gold);color:var(--gold);}
+
+main{padding:40px 5%;}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:30px;}
+.page-title span{color:var(--gold);}
+
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:36px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 20px;}
+.stat .num{font-family:'Barlow Condensed',sans-serif;font-size:2.2rem;font-weight:800;color:var(--gold);}
+.stat .lbl{font-size:.8rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:1px;}
+
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.table-header{
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+}
+.table-header h3{font-size:1rem;font-weight:600;}
+.search-box{
+  padding:8px 14px;background:#111;border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:.85rem;outline:none;width:220px;
+}
+.search-box:focus{border-color:rgba(242,201,76,.4);}
+table{width:100%;border-collapse:collapse;}
+th{padding:12px 20px;text-align:left;font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);background:#111;}
+td{padding:14px 20px;font-size:.88rem;border-bottom:1px solid var(--border);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+
+.action-btn{
+  padding:6px 12px;border-radius:6px;font-size:.75rem;font-weight:700;
+  cursor:pointer;transition:.2s;border:none;outline:none;margin-right:5px;
+}
+.btn-approve{background:rgba(34,197,94,0.1);color:#22c55e;border:1px solid rgba(34,197,94,0.2);}
+.btn-approve:hover{background:rgba(34,197,94,0.2);}
+.btn-plan{background:rgba(242,201,76,0.1);color:var(--gold);border:1px solid rgba(242,201,76,0.2);}
+.btn-plan:hover{background:rgba(242,201,76,0.2);}
+.btn-delete{background:rgba(229,85,85,.1);color:#e55;border:1px solid rgba(229,85,85,.2);}
+.btn-delete:hover{background:rgba(229,85,85,.2);}
+
+.badge{
+  padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700;text-transform:uppercase;
+}
+.badge-pending{background:rgba(242,201,76,0.1);color:var(--gold);}
+.badge-approved{background:rgba(34,197,94,0.1);color:#22c55e;}
+
+.plan-info{font-size:.75rem;color:var(--muted);margin-top:4px;}
+.empty{padding:40px;text-align:center;color:var(--muted);font-size:.9rem;}
+
+/* Modal Style */
+#plan-modal{
+  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.8);align-items:center;justify-content:center;z-index:100;
+}
+.modal-card{
+  background:var(--card);padding:30px;border-radius:18px;border:1px solid var(--border);
+  width:100%;max-width:350px;
+}
+.modal-card h4{margin-bottom:20px;font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;}
+.modal-card select, .modal-card input{
+  width:100%;padding:10px;margin-bottom:15px;background:#111;border:1px solid var(--border);
+  border-radius:8px;color:#fff;outline:none;
+}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">Power<span>Zone</span> <span style="color:var(--muted);font-size:1rem;font-weight:400;">Admin</span></span>
+  <div class="header-actions">
+    <a href="/">← Site</a>
+    <a href="#" onclick="logout()" style="background:rgba(229,85,85,.1);color:#e55;">Logout</a>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">Admin <span>Dashboard</span></div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="num" id="s-total">0</div><div class="lbl">Total Members</div></div>
+    <div class="stat"><div class="num" id="s-pending">0</div><div class="lbl">Pending Approval</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <h3>Member Management & Plan Allotment</h3>
+      <input class="search-box" id="search" placeholder="Search members..." oninput="filterTable()">
+    </div>
+    <div id="table-container">
+      <div class="empty">Loading...</div>
+    </div>
+  </div>
+</main>
+
+<div id="plan-modal">
+  <div class="modal-card">
+    <h4 id="modal-title">Edit Plan</h4>
+    <label style="font-size:.7rem;color:var(--muted);display:block;margin-bottom:5px;">SELECT PLAN</label>
+    <select id="m-plan">
+      <option value="Monthly">Monthly</option>
+      <option value="Quarterly">Quarterly</option>
+      <option value="Half-Yearly">Half-Yearly</option>
+      <option value="Yearly">Yearly</option>
+      <option value="Lifetime">Lifetime</option>
+    </select>
+    <label style="font-size:.7rem;color:var(--muted);display:block;margin-bottom:5px;">EXPIRY DATE</label>
+    <input type="date" id="m-expiry">
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <button onclick="closeModal()" style="flex:1;padding:10px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:30px;cursor:pointer;">Cancel</button>
+      <button onclick="savePlan()" style="flex:1;padding:10px;background:var(--gold);border:none;color:#000;font-weight:700;border-radius:30px;cursor:pointer;">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (localStorage.getItem('pz_isAdmin') !== 'true') window.location.href = '/admin-login';
+
+function logout() {
+  localStorage.clear();
+  window.location.href = '/admin-login';
+}
+
+let allData = [];
+let editingId = null;
+
+async function loadData(){
+  try{
+    const r = await fetch('/api/members');
+    allData = await r.json();
+    document.getElementById('s-total').textContent = allData.length;
+    document.getElementById('s-pending').textContent = allData.filter(m => m.approved === false).length;
+    renderTable();
+  } catch(e){
+    document.getElementById('table-container').innerHTML='<div class="empty">Failed to load data.</div>';
+  }
+}
+
+function renderTable(data){
+  const filtered = data || allData;
+  if(!filtered.length){
+    document.getElementById('table-container').innerHTML='<div class="empty">No members found.</div>';
+    return;
+  }
+  const rows = filtered.map((c, i)=>`
+    <tr>
+      <td style="color:var(--muted);">${i + 1}</td>
+      <td>
+        <div style="font-weight:600;">${esc(c.name)}</div>
+        <div style="font-size:.7rem;color:var(--muted);">${esc(c.username)}</div>
+      </td>
+      <td>
+        <span class="badge ${c.approved ? 'badge-approved' : 'badge-pending'}">${c.approved ? 'Approved' : 'Pending'}</span>
+        <div class="plan-info">
+          Plan: <span style="color:var(--gold);font-weight:600;">${c.plan || 'N/A'}</span><br>
+          Exp: <span style="color:#fff;">${c.expiryDate ? formatDate(c.expiryDate, true) : 'No Expiry'}</span>
+        </div>
+      </td>
+      <td style="text-align:right;white-space:nowrap;">
+        ${!c.approved ? `<button class="action-btn btn-approve" onclick="approveMember('${c._id}')">Approve</button>` : ''}
+        <button class="action-btn btn-plan" onclick="openPlanModal('${c._id}', '${c.plan}', '${c.expiryDate}')">Plan</button>
+        <button class="action-btn btn-delete" onclick="deleteEntry('${c._id}')">✕</button>
+      </td>
+    </tr>
+  `).join('');
+  document.getElementById('table-container').innerHTML=`
+    <table>
+      <thead><tr><th>#</th><th>Member</th><th>Access & Plan</th><th style="text-align:right;">Actions</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+async function approveMember(id){
+  if(!confirm('Approve this member login access?')) return;
+  await fetch('/api/approve', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({id})
+  });
+  loadData();
+}
+
+function openPlanModal(id, plan, expiry){
+  editingId = id;
+  document.getElementById('m-plan').value = plan || 'Monthly';
+  document.getElementById('m-expiry').value = expiry ? expiry.split('T')[0] : '';
+  document.getElementById('plan-modal').style.display = 'flex';
+}
+function closeModal(){ document.getElementById('plan-modal').style.display = 'none'; }
+
+async function savePlan(){
+  const plan = document.getElementById('m-plan').value;
+  const expiry = document.getElementById('m-expiry').value;
+  await fetch('/api/update-plan', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({id: editingId, plan, expiryDate: expiry})
+  });
+  closeModal();
+  loadData();
+}
+
+async function deleteEntry(id){
+  if(!confirm('Delete this member?')) return;
+  await fetch(`/api/delete?id=${id}`);
+  loadData();
+}
+
+function filterTable(){
+  const q = document.getElementById('search').value.toLowerCase();
+  renderTable(allData.filter(c => c.name.toLowerCase().includes(q) || c.username.toLowerCase().includes(q)));
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function formatDate(iso, onlyDate = false){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  const options = onlyDate ? {day:'2-digit',month:'short',year:'numeric'} : {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'};
+  return d.toLocaleDateString('en-IN', options);
+}
+loadData();
+</script>
+</body>
+</html>

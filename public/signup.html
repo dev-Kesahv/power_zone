@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login – Power Zone</title>
+<title>Sign Up – Power Zone</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -90,6 +90,15 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 
 .login-btn:hover{
   background:var(--gold-dark);
 }
+.switch-link{
+  margin-top: 20px;
+  font-size: .85rem;
+  color: var(--muted);
+}
+.switch-link a{
+  color: var(--gold);
+  font-weight: 600;
+}
 </style>
 </head>
 <body>
@@ -100,71 +109,71 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 
 
 <main>
   <div class="login-card">
-    <div class="login-title">Member <span>Login</span></div>
-    <div class="login-sub">Welcome back to the club</div>
-    <div id="reg-success" style="color:#22c55e; font-size:.85rem; margin-bottom:15px; display:none; background:rgba(34,197,94,0.1); padding:10px; border-radius:8px; border:1px solid rgba(34,197,94,0.3);">
-      Registration successful! Please sign in.
-    </div>
+    <div class="login-title">Join <span>Now</span></div>
+    <div class="login-sub">Create your account to start your journey</div>
     
-    <form id="login-form">
+    <form id="signup-form">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="fullname" placeholder="Enter your full name" required>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="phone" placeholder="Enter your phone number" required>
+      </div>
       <div class="form-group">
         <label>Username</label>
-        <input type="text" id="username" placeholder="Enter username" required>
+        <input type="text" id="username" placeholder="Choose a username" required>
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="password" placeholder="Enter password" required>
+        <input type="password" id="password" placeholder="Create a password" required>
       </div>
       <div id="error-msg" style="color:#e55; font-size:.85rem; margin-bottom:15px; display:none;"></div>
-      <button type="submit" class="login-btn">Sign In</button>
+      <button type="submit" class="login-btn">Create Account</button>
     </form>
     
-    <div style="margin-top: 20px; font-size: .85rem; color: var(--muted);">
-      Not a member? <a href="/signup" style="color: var(--gold); font-weight: 600;">Sign Up</a>
+    <div class="switch-link">
+      Already a member? <a href="/login">Sign In</a>
     </div>
-    
-    </div>
-  </main>
-<script>
-  // Check for registration success
-  if (new URLSearchParams(window.location.search).get('reg') === 'success') {
-    document.getElementById('reg-success').style.display = 'block';
-  }
+  </div>
+</main>
 
-  document.getElementById('login-form').addEventListener('submit', async (e) => {
+<script>
+  document.getElementById('signup-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const name = document.getElementById('fullname').value;
+    const phone = document.getElementById('phone').value;
     const user = document.getElementById('username').value;
     const pass = document.getElementById('password').value;
     const errorMsg = document.getElementById('error-msg');
     const btn = e.target.querySelector('button');
     
     btn.disabled = true;
-    btn.textContent = 'Signing in...';
+    btn.textContent = 'Creating account...';
     errorMsg.style.display = 'none';
     
     try {
-      const res = await fetch('/api/member/login', {
+      const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user, password: pass })
+        body: JSON.stringify({ name, phone, username: user, password: pass })
       });
       
       if (res.ok) {
-        localStorage.setItem('pz_isLoggedIn', 'true');
-        localStorage.setItem('pz_isAdmin', 'false');
-        window.location.href = '/dashboard';
+        window.location.href = '/login?reg=success';
       } else {
         const data = await res.json();
-        errorMsg.textContent = data.error || 'Invalid credentials';
+        errorMsg.textContent = data.error || 'Registration failed';
         errorMsg.style.display = 'block';
         btn.disabled = false;
-        btn.textContent = 'Sign In';
+        btn.textContent = 'Create Account';
       }
     } catch (err) {
       errorMsg.textContent = 'Connection error. Please try again.';
       errorMsg.style.display = 'block';
       btn.disabled = false;
-      btn.textContent = 'Sign In';
+      btn.textContent = 'Create Account';
     }
   });
 </script>

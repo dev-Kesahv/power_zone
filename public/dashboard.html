@@ -66,7 +66,10 @@ tr:hover td{background:rgba(255,255,255,.02);}
 <body>
 <header>
   <span class="logo">Power<span>Zone</span> <span style="color:var(--muted);font-size:1rem;font-weight:400;">Dashboard</span></span>
-  <a href="/">← Back to Site</a>
+  <div style="display:flex;gap:15px;align-items:center;">
+    <a href="/">← Back to Site</a>
+    <a href="#" onclick="logout()" style="background:rgba(229,85,85,.1);color:#e55;border:1px solid rgba(229,85,85,.2);padding:7px 16px;border-radius:20px;font-size:.82rem;">Logout</a>
+  </div>
 </header>
 
 <main>
@@ -91,6 +94,19 @@ tr:hover td{background:rgba(255,255,255,.02);}
 </main>
 
 <script>
+// Authentication Check
+if (localStorage.getItem('pz_isLoggedIn') !== 'true') {
+  window.location.href = '/login';
+}
+
+function logout() {
+  localStorage.removeItem('pz_isLoggedIn');
+  localStorage.removeItem('pz_isAdmin');
+  window.location.href = '/login';
+}
+
+const isAdmin = localStorage.getItem('pz_isAdmin') === 'true';
+
 let allData = [];
 
 async function loadData(){
@@ -121,19 +137,19 @@ function renderTable(data){
       <td style="color:var(--muted);font-size:.8rem;">${i + 1}</td>
       <td>
         <div style="font-weight:600;">${esc(c.name)}</div>
-        <div style="font-size:.8rem;color:var(--muted);margin-top:2px;">${esc(c.phone)}</div>
       </td>
       <td style="color:var(--muted);font-size:.82rem;">${formatDate(c.createdAt)}</td>
+      ${isAdmin ? `
       <td style="text-align:right;">
         <button class="action-btn btn-delete" onclick="deleteEntry('${c._id}')">Delete</button>
-      </td>
+      </td>` : ''}
     </tr>
   `).join('');
 
   document.getElementById('table-container').innerHTML=`
     <table>
       <thead><tr>
-        <th>#</th><th>Member Details</th><th>Date</th><th style="text-align:right;">Actions</th>
+        <th>#</th><th>Member Details</th><th>Date</th>${isAdmin ? '<th style="text-align:right;">Actions</th>' : ''}
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
